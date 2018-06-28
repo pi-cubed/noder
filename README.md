@@ -14,8 +14,8 @@
 
 [build-badge]: https://img.shields.io/travis/pi-cubed/node-starter/master.png?style=flat-square
 [build]: https://travis-ci.org/pi-cubed/node-starter
-[npm-version-badge]: https://img.shields.io/npm/v/node-starter.png?style=flat-square
-[npm]: https://www.npmjs.org/package/node-starter
+[npm-version-badge]: https://img.shields.io/npm/v/@pi-cubed/node-starter.png?style=flat-square
+[npm]: https://www.npmjs.org/package/@pi-cubed/node-starter
 [coveralls-badge]: https://img.shields.io/coveralls/pi-cubed/node-starter/master.png?style=flat-square
 [coveralls]: https://coveralls.io/github/pi-cubed/node-starter
 [github-stars-badge]: https://img.shields.io/github/stars/pi-cubed/node-starter.svg?style=social&label=Stars
