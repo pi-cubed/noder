@@ -12,8 +12,8 @@
     "prepublishOnly": "yarn clean build test clean build"
   },
   "watch": {
-    "build": "{src,test}/*.js",
-    "test": "{src,test}/*.js"
+    "build": "{src,test}/**/*.js",
+    "test": "{src,test}/**/*.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.51",

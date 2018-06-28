@@ -1,3 +1,3 @@
 import { command } from 'yargs';
 
-export const Create = 6;
+export const create = command('create <name>', 'make a Node.js program');
