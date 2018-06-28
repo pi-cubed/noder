@@ -34,23 +34,55 @@
 [bithound-badge]: https://www.bithound.io/github/pi-cubed/node-starter/badges/score.svg?style=flat-square
 [bithound]: https://www.bithound.io/github/pi-cubed/node-starter
 
-## Install
+# Usage
+
+```sh
+$ npm install -g node-starter
+$ node-starter COMMAND
+running command...
+$ node-starter (-v|--version|version)
+node-starter/0.0.0 darwin-x64 node-v10.3.0
+$ node-starter --help [COMMAND]
+USAGE
+  $ node-starter COMMAND
+...
+```
+
+# Commands
+
+- [`node-starter hello`](#node-starter-hello)
+- [`node-starter help [COMMAND]`](#node-starter-help-command)
+
+## `node-starter hello`
+
+Describe the command here
 
 ```
-$ yarn add node-starter --save-dev
+USAGE
+  $ node-starter hello
+
+OPTIONS
+  -n, --name=name  name to print
+
+DESCRIPTION
+  ...
+  Extra documentation goes here
 ```
 
-## Docs
+## `node-starter help [COMMAND]`
 
-https://node-starter.github.io
+display help for node-starter
 
-## Usage
+```
+USAGE
+  $ node-starter help [COMMAND]
 
-coming soon
+ARGUMENTS
+  COMMAND  command to show help for
 
-## API
-
-coming soon
+OPTIONS
+  --all  see all commands in CLI
+```
 
 ## Maintainers
 

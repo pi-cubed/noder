@@ -1,1 +1,1 @@
-console.log(6);
+export * from './commands/index';

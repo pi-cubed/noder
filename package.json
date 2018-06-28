@@ -2,7 +2,43 @@
   "name": "@pi-cubed/node-starter",
   "version": "0.1.0",
   "description": "Make Node.js programs",
-  "main": "src/index.js",
+  "scripts": {
+    "build": "babel src -d build",
+    "test": "ava",
+    "clean": "rm -rf build",
+    "dev": "npm-watch",
+    "cz": "git-cz",
+    "precommit": "pretty-quick --staged && yarn prepublishOnly",
+    "prepublishOnly": "yarn clean build test clean build"
+  },
+  "watch": {
+    "build": "{src,test}/*.js",
+    "test": "{src,test}/*.js"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.51",
+    "yargs": "^11.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.51",
+    "@babel/plugin-transform-runtime": "^7.0.0-beta.51",
+    "@babel/preset-env": "^7.0.0-beta.51",
+    "@babel/register": "^7.0.0-beta.51",
+    "ava": "^1.0.0-beta.6",
+    "cz-conventional-changelog": "^2.1.0",
+    "husky": "^0.14.3",
+    "npm-watch": "^0.3.0",
+    "prettier": "^1.13.6",
+    "pretty-quick": "^1.6.0"
+  },
+  "bin": {
+    "node-starter": "bin/index.js"
+  },
+  "main": "build/index.js",
+  "files": [
+    "/bin",
+    "/build"
+  ],
   "repository": "git@github.com:pi-cubed/node-starter.git",
   "license": "MIT",
   "author": "Pi Cubed",
@@ -19,24 +55,17 @@
       "url": "https://github.com/drich14"
     }
   ],
-  "scripts": {
-    "test": "ava",
-    "test:watch": "yarn test --watch",
-    "watch": "yarn test:watch",
-    "cz": "git-cz",
-    "precommit": "pretty-quick --staged && yarn prepublishOnly",
-    "prepublishOnly": "yarn test"
-  },
-  "devDependencies": {
-    "ava": "^1.0.0-beta.6",
-    "cz-conventional-changelog": "^2.1.0",
-    "husky": "^0.14.3",
-    "prettier": "^1.13.6",
-    "pretty-quick": "^1.6.0"
-  },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "ava": {
+    "require": [
+      "@babel/register"
+    ]
+  },
+  "engines": {
+    "node": ">=8.0.0"
   }
 }
