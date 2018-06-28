@@ -1,0 +1,32 @@
+{
+	"name": "node-starter",
+	"version": "0.1.0",
+	"description": "Make Node.js programs",
+	"main": "src/index.js",
+	"repository": "git@github.com:pi-cubed/node-starter.git",
+	"license": "MIT",
+	"author": "Pi Cubed",
+	"homepage": "https://github.com/pi-cubed/node-starter",
+	"keywords": ["node", "cli"],
+	"bugs": "https://github.com/pi-cubed/node-starter/issues",
+	"contributors": [
+		{
+			"name": "Dylan Richardson",
+			"email": "dylanrichardson1996@gmail.com",
+			"url": "https://github.com/drich14"
+		}
+	],
+	"scripts": {
+		"test": "ava",
+		"cz": "git-cz"
+	},
+	"devDependencies": {
+		"ava": "^1.0.0-beta.6",
+		"cz-conventional-changelog": "^2.1.0"
+	},
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
+}
