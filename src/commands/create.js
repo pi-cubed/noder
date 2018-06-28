@@ -1,8 +1,15 @@
 import { command } from 'yargs';
-import { access, constants } from 'fs';
+import { accessSync, constants, mkdirSync } from 'fs';
+import { promisify } from 'bluebird';
 
-const fileExists = path =>
-  new Promise(res => access(path, constants.F_OK, res));
+export const fileExists = path => {
+  try {
+    accessSync(path, constants.F_OK);
+    return true;
+  } catch ({ code }) {
+    return code !== 'ENOENT';
+  }
+};
 
 const nameTakenError = () => {
   throw new Error('File already exists with that name');
@@ -11,8 +18,9 @@ const nameTakenError = () => {
 /**
  * TODO docs
  */
-export const create = name => fileExists(name).then(nameTakenError);
-
+export const create = promisify(
+  name => (fileExists(name) ? nameTakenError() : mkdirSync(name))
+);
 /**
  * TODO docs
  */
