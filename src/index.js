@@ -1,3 +1,3 @@
 import { create } from './commands/index';
 
-create.help('h').argv;
+const { argv } = create.demandCommand().help('h');

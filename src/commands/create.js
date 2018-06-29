@@ -1,27 +1,28 @@
 import { command } from 'yargs';
-import { accessSync, constants, mkdirSync } from 'fs';
+import { mkdir } from 'fs';
 import { promisify } from 'bluebird';
-
-export const fileExists = path => {
-  try {
-    accessSync(path, constants.F_OK);
-    return true;
-  } catch ({ code }) {
-    return code !== 'ENOENT';
-  }
-};
+import writePkg from 'write-pkg';
+import { fileExists } from '../utils';
 
 const nameTakenError = () => {
   throw new Error('File already exists with that name');
 };
 
+const mkdirAsync = promisify(mkdir);
+
+const initPkg = name => writePkg(name, { name, version: '0.1.0' });
+
+const handler = ({ name }) =>
+  fileExists(name)
+    ? nameTakenError()
+    : mkdirAsync(name).then(() => initPkg(name));
+
 /**
  * TODO docs
  */
-export const create = promisify(
-  name => (fileExists(name) ? nameTakenError() : mkdirSync(name))
+export const create = command(
+  'create <name>',
+  'make a Node.js program',
+  {},
+  handler
 );
-/**
- * TODO docs
- */
-export const createCommand = command('create <name>', 'make a Node.js program');

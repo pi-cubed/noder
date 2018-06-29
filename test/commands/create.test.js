@@ -1,36 +1,37 @@
 import test from 'ava';
-import { createCommand, create, fileExists } from '../../src/commands/index';
-import { rmdirSync } from 'fs';
+import { remove } from 'fs-extra';
+import readPkg from 'read-pkg';
+import { create } from '../../src/commands/index';
+import { fileExists } from '../../src/utils';
 
-const msgAsync = cmd => (args, expected) => ({ is }) =>
-  cmd(args, ({ message }) => is(message, expected));
+const parseIs = (args, cb) => create.exitProcess(false).parse(args, cb);
 
-const parseError = msgAsync((args, isCorrect) =>
-  createCommand.exitProcess(false).parse(args, isCorrect)
-);
+const NAME = 'test-directory';
 
-const createError = msgAsync((name, isCorrect) =>
-  create(name).catch(isCorrect)
-);
+test.beforeEach(() => (fileExists(NAME) ? remove(NAME) : null));
+test.afterEach.always(() => (fileExists(NAME) ? remove(NAME) : null));
 
-const DIR = 'test-directory';
-
-test.afterEach.always(() => (fileExists(DIR) ? rmdirSync(DIR) : null));
-
-test(
-  'fails parse if not given a name',
-  parseError(
-    'create',
-    'Not enough non-option arguments: got 0, need at least 1'
-  )
-);
-
-test(
-  'fails if directory with name exists',
-  createError('test', 'File already exists with that name')
-);
+test('fails parse if not given a name', ({ is }) => {
+  parseIs('create', ({ message }) =>
+    is(message, 'Not enough non-option arguments: got 0, need at least 1')
+  );
+});
 
 test('creates directory with given name', ({ truthy }) => {
-  create(DIR);
-  truthy(fileExists(DIR));
+  parseIs(`create ${NAME}`, () => truthy(fileExists(NAME)));
+});
+
+test('fails if directory with name exists', ({ is, throws }) => {
+  const { message } = throws(() => parseIs('create test'));
+  is(message, 'File already exists with that name');
+});
+
+test.skip('creates package.json in directory', ({ truthy }) => {
+  parseIs(`create ${NAME}`, () => truthy(fileExists(`${NAME}/package.json`)));
+});
+
+test.skip('package.json has given name', ({ is }) => {
+  parseIs(`create ${NAME}`, () =>
+    is(readPkg.sync({ cwd: NAME }, 'name'), NAME)
+  );
 });
