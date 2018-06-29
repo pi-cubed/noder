@@ -1,6 +1,6 @@
 {
   "name": "@pi-cubed/node-starter",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "description": "Make Node.js programs",
   "scripts": {
     "build": "babel src -d build",
@@ -13,8 +13,8 @@
     "prepublishOnly": "run-s clean build test clean build"
   },
   "watch": {
-    "build": "{src,test}/**/*.js",
-    "test": "{src,test}/**/*.js"
+    "build": "{src,test}/*/*.js",
+    "test": "{src,test}/*/*.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.51",
