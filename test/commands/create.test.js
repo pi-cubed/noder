@@ -2,7 +2,17 @@ import { serial as test } from 'ava';
 import { remove } from 'fs-extra';
 import readPkg from 'read-pkg';
 import { create, handler } from '../../src/commands/index';
-import { fileExists, DEPS, DEV_DEPS, SCRIPTS } from '../../src/utils';
+import {
+  fileExists,
+  DEPS,
+  DEV_DEPS,
+  SCRIPTS,
+  SCOPE,
+  AUTHOR,
+  LICENSE,
+  VERSION,
+  ENGINES
+} from '../../src/utils';
 
 const NAME = 'test-directory';
 
@@ -45,8 +55,14 @@ test('package.json does not have yarg impl fields', ({ truthy }) =>
     truthy(!($0 || h || _));
   }));
 
-test.skip('package.json has default dependencies', ({ deepEqual }) =>
-  handle().then(() => deepEqual(getPkg().dependencies, DEPS)));
+test('package.json has given name with default scope', ({ is }) =>
+  handle().then(() => is(getPkg().name, `@${SCOPE}/${NAME}`)));
+
+test('package.json has given name with given scope', ({ is }) =>
+  handle({ scope: 'test' }).then(() => is(getPkg().name, `@test/${NAME}`)));
+
+test('package.json has no dependencies', ({ is }) =>
+  handle().then(() => is(getPkg().dependencies, undefined)));
 
 test('package.json has given and default dependencies', ({ deepEqual }) =>
   handle({ dependencies: { '@pi-cubed/typed-ui': 'latest' } }).then(() =>
@@ -75,32 +91,37 @@ test('package.json has given and default scripts', ({ deepEqual }) =>
     deepEqual(getPkg().scripts, { a: 'a', ...SCRIPTS })
   ));
 
-test('package.json has given name', ({ is }) =>
-  handle().then(() => is(getPkg().name, NAME)));
-
 test('package.json has default version', ({ is }) =>
-  handle().then(() => is(getPkg().version, '0.1.0')));
+  handle().then(() => is(getPkg().version, VERSION)));
 
 test('package.json has given version', ({ is }) =>
   handle({ version: '1.0.0' }).then(() => is(getPkg().version, '1.0.0')));
 
 test('package.json has default license', ({ is }) =>
-  handle().then(() => is(getPkg().license, 'MIT')));
+  handle().then(() => is(getPkg().license, LICENSE)));
 
 test('package.json has given license', ({ is }) =>
   handle({ license: 'ISC' }).then(() => is(getPkg().license, 'ISC')));
 
 test('package.json has default author', ({ deepEqual }) =>
-  handle().then(() => deepEqual(getPkg().author, { name: 'Pi Cubed' })));
+  handle().then(() => deepEqual(getPkg().author, { name: AUTHOR })));
 
 test('package.json has given author', ({ deepEqual }) =>
   handle({ author: 'test' }).then(() =>
     deepEqual(getPkg().author, { name: 'test' })
   ));
 
+test('package.json has given repo url', ({ deepEqual }) =>
+  handle({ scope: 'a' }).then(() =>
+    deepEqual(getPkg().repository, {
+      type: 'git',
+      url: `git+ssh://git@github.com/a/${NAME}.git`
+    })
+  ));
+
 test('package.json has default homepage', ({ is }) =>
   handle().then(() =>
-    is(getPkg().homepage, `https://github.com/pi-cubed/${NAME}`)
+    is(getPkg().homepage, `https://github.com/${SCOPE}/${NAME}`)
   ));
 
 test('package.json has given homepage', ({ is }) =>
@@ -111,7 +132,7 @@ test('package.json has given homepage', ({ is }) =>
 test('package.json has default bugs url', ({ deepEqual }) =>
   handle().then(() =>
     deepEqual(getPkg().bugs, {
-      url: `https://github.com/pi-cubed/${NAME}/issues`
+      url: `https://github.com/${SCOPE}/${NAME}/issues`
     })
   ));
 
@@ -121,15 +142,11 @@ test('package.json has given bugs url', ({ deepEqual }) =>
   ));
 
 test('package.json has default engine', ({ deepEqual }) =>
-  handle().then(() =>
-    deepEqual(getPkg().engines, {
-      node: '>=8.0.0'
-    })
-  ));
+  handle().then(() => deepEqual(getPkg().engines, ENGINES)));
 
 test('package.json has given and default engines', ({ deepEqual }) =>
   handle({ engines: { python: '>=3.5.0' } }).then(() =>
-    deepEqual(getPkg().engines, { node: '>=8.0.0', python: '>=3.5.0' })
+    deepEqual(getPkg().engines, { ...ENGINES, python: '>=3.5.0' })
   ));
 
 test('package.json has given engine', ({ deepEqual }) =>
@@ -139,11 +156,6 @@ test('package.json has given engine', ({ deepEqual }) =>
 
 test('package.json has given description', ({ is }) =>
   handle({ description: 'test' }).then(() => is(getPkg().description, 'test')));
-
-test('package.json has given repo url', ({ deepEqual }) =>
-  handle({ repository: 'test' }).then(() =>
-    deepEqual(getPkg().repository, { type: 'git', url: 'test' })
-  ));
 
 test('package.json has given custom fields', ({ is }) =>
   handle({ test: 'test' }).then(() => is(getPkg().test, 'test')));
@@ -162,3 +174,35 @@ test('initializes yarn', ({ truthy }) =>
   handle({ install: true }).then(() =>
     truthy(fileExists(`${NAME}/yarn.lock`))
   ));
+
+// lib
+
+test('adds README.md', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/README.md`))));
+
+test('adds .travis.yml', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/.travis.yml`))));
+
+test('adds LICENSE', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/LICENSE`))));
+
+test('adds CONTRIBUTING.md', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/CONTRIBUTING.md`))));
+
+test('adds docs config', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/book.json`))));
+
+test('adds .prettierrc', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/.prettierrc`))));
+
+test('adds src directory', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/src`))));
+
+test('adds test directory', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/test`))));
+
+test('adds index.js template', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/src/index.js`))));
+
+test('adds index.test.js template', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/test/index.test.js`))));

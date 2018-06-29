@@ -1,66 +1,89 @@
 import { command } from 'yargs';
-import fs from 'fs';
 import { promisifyAll } from 'bluebird';
-import request from 'request-promise';
 import writePkg from 'write-pkg';
 import git from 'simple-git/promise';
 import installPkgs from 'install-packages';
-import { fileExists, DEPS, DEV_DEPS, SCRIPTS } from '../utils';
-
-const { mkdirAsync, writeFileAsync } = promisifyAll(fs);
+import replace from 'replace-in-file';
+import {
+  fileExists,
+  DEPS,
+  DEV_DEPS,
+  SCRIPTS,
+  SCOPE,
+  VERSION,
+  LICENSE,
+  AUTHOR,
+  ENGINES
+} from '../utils';
+const { mkdirAsync, writeFileAsync } = promisifyAll(require('fs'));
+const { copyAsync } = promisifyAll(require('fs-extra'));
 
 const nameTakenError = () => {
   throw new Error('File already exists with that name');
 };
 
-const initPkg = ({
-  name,
-  version = '0.1.0',
-  license = 'MIT',
-  author = 'Pi Cubed',
-  dependencies = {},
-  devDependencies = {},
-  scripts = {},
-  engines = {},
-  ...fields
-}) =>
-  writePkg(name, {
+const initPkg = fields => {
+  const {
     name,
+    scope = SCOPE,
+    version = VERSION,
+    license = LICENSE,
+    author = AUTHOR,
+    dependencies = {},
+    devDependencies = {},
+    scripts = {},
+    engines = {}
+  } = fields;
+  const pkgName = scope ? `@${scope}/${name}` : name;
+  return writePkg(name, {
+    ...fields,
+    name: pkgName,
     version,
     dependencies: { ...DEPS, ...dependencies },
     devDependencies: { ...DEV_DEPS, ...devDependencies },
     scripts: { ...SCRIPTS, ...scripts },
     license,
     author,
-    homepage: `https://github.com/pi-cubed/${name}`,
-    bugs: `https://github.com/pi-cubed/${name}/issues`,
-    engines: { node: '>=8.0.0', ...engines },
-    ...fields
-  });
+    repository: `git+ssh://git@github.com/${scope}/${name}.git`,
+    homepage: fields.homepage || `https://github.com/${scope}/${name}`,
+    bugs: fields.bugs || `https://github.com/${scope}/${name}/issues`,
+    engines: { ...ENGINES, ...engines }
+  }).then(() => fields);
+};
 
-const writeGitignore = name =>
-  request(
-    'https://raw.githubusercontent.com/github/gitignore/master/Node.gitignore'
-  ).then(data => writeFileAsync(`${name}/.gitignore`, data));
+const mkdir = fields =>
+  fileExists(fields.name)
+    ? nameTakenError()
+    : mkdirAsync(fields.name).then(() => fields);
 
-const initGit = name =>
-  git(name)
+const initGit = fields =>
+  git(fields.name)
     .init()
-    .then(() => writeGitignore(name));
+    .then(() => fields);
 
-const initYarn = name => installPkgs({ cwd: name });
+const initYarn = fields => installPkgs({ cwd: fields.name }).then(() => fields);
+
+const copyLib = fields => copyAsync('lib', fields.name).then(() => fields);
+
+const updateFiles = fields => {
+  const { name, scope, author, license } = fields;
+  return replace({
+    files: ['README.md', 'LICENSE'],
+    from: ['NAME', 'SCOPE', 'AUTHOR', 'LICENSE'],
+    to: [name, scope, author, license]
+  }).then(() => fields);
+};
 
 /**
  * TODO docs
  */
 export const handler = ({ $0, h, _, install = true, ...fields }) => {
-  const { name } = fields;
-  return fileExists(name)
-    ? nameTakenError()
-    : mkdirAsync(name)
-        .then(() => initPkg(fields))
-        .then(() => initGit(name))
-        .then(() => install && initYarn(name));
+  return mkdir(fields)
+    .then(initPkg)
+    .then(initGit)
+    .then(copyLib)
+    .then(updateFiles)
+    .then(install ? initYarn : _ => _);
 };
 
 /**

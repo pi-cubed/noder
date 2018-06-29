@@ -21,3 +21,13 @@ export const SCRIPTS = {
   dev: 'node-starter dev',
   start: 'node-starter start'
 };
+
+export const SCOPE = 'pi-cubed';
+
+export const VERSION = '0.1.0';
+
+export const AUTHOR = 'Pi Cubed';
+
+export const LICENSE = 'MIT';
+
+export const ENGINES = { node: '>=8.0.0' };

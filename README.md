@@ -23,7 +23,7 @@
 [contributors-badge]: https://img.shields.io/github/contributors/pi-cubed/node-starter.svg?style=flat-square
 [contributors]: https://github.com/pi-cubed/node-starter/graphs/contributors
 [license-badge]: https://img.shields.io/github/license/pi-cubed/node-starter.svg?style=flat-square
-[license]: https://github.com/pi-cubed/node-starter/blob/master/LICENSE
+[license]: https://github.com/pi-cubed/node-starter/blob/master/ISC
 [npm-downloads-badge]: https://img.shields.io/npm/dt/node-starter.svg?style=flat-square
 [synk-badge]: https://snyk.io/test/github/pi-cubed/node-starter/badge.svg?style=flat-square
 [synk]: https://snyk.io/test/github/pi-cubed/node-starter
@@ -34,55 +34,23 @@
 [bithound-badge]: https://www.bithound.io/github/pi-cubed/node-starter/badges/score.svg?style=flat-square
 [bithound]: https://www.bithound.io/github/pi-cubed/node-starter
 
-# Usage
+## Install
+
+```
+$ yarn global add @pi-cubed/node-starter
+```
+
+## Usage
 
 ```sh
-$ npm install -g node-starter
-$ node-starter COMMAND
-running command...
-$ node-starter (-v|--version|version)
-node-starter/0.0.0 darwin-x64 node-v10.3.0
-$ node-starter --help [COMMAND]
-USAGE
-  $ node-starter COMMAND
-...
+$ node-starter create <name>
+$ cd <name>
+$ yarn dev
 ```
 
-# Commands
+## API
 
-- [`node-starter hello`](#node-starter-hello)
-- [`node-starter help [COMMAND]`](#node-starter-help-command)
-
-## `node-starter hello`
-
-Describe the command here
-
-```
-USAGE
-  $ node-starter hello
-
-OPTIONS
-  -n, --name=name  name to print
-
-DESCRIPTION
-  ...
-  Extra documentation goes here
-```
-
-## `node-starter help [COMMAND]`
-
-display help for node-starter
-
-```
-USAGE
-  $ node-starter help [COMMAND]
-
-ARGUMENTS
-  COMMAND  command to show help for
-
-OPTIONS
-  --all  see all commands in CLI
-```
+coming soon
 
 ## Maintainers
 
