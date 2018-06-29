@@ -2,13 +2,13 @@ import { serial as test } from 'ava';
 import { remove } from 'fs-extra';
 import readPkg from 'read-pkg';
 import { create, handler } from '../../src/commands/index';
-import { fileExists } from '../../src/utils';
+import { fileExists, DEPS, DEV_DEPS, SCRIPTS } from '../../src/utils';
 
 const NAME = 'test-directory';
 
 const parseCreate = (...args) => create.exitProcess(false).parse(...args);
 
-const handle = (opts = {}) => handler({ name: NAME, ...opts });
+const handle = (opts = {}) => handler({ name: NAME, install: false, ...opts });
 
 const rmdir = () => fileExists(NAME) && remove(NAME);
 
@@ -17,10 +17,14 @@ const getPkg = key => readPkg.sync({ cwd: NAME });
 test.beforeEach(rmdir);
 test.afterEach.always(rmdir);
 
+// parsing
+
 test('fails parse if not given a name', ({ is }) =>
   parseCreate('create', ({ message }) =>
     is(message, 'Not enough non-option arguments: got 0, need at least 1')
   ));
+
+// directory
 
 test('fails if directory with name exists', ({ is, throws }) => {
   const { message } = throws(() => handle({ name: 'src' }));
@@ -30,8 +34,25 @@ test('fails if directory with name exists', ({ is, throws }) => {
 test('creates directory with given name', ({ truthy }) =>
   handle().then(() => truthy(fileExists(NAME))));
 
+// package.json
+
 test('creates package.json in directory', ({ truthy }) =>
   handle().then(() => truthy(fileExists(`${NAME}/package.json`))));
+
+test('package.json does not have yarg impl fields', ({ truthy }) =>
+  handle().then(() => {
+    const { $0, h, _ } = getPkg();
+    truthy(!($0 || h || _));
+  }));
+
+test.skip('package.json has default dependencies', ({ deepEqual }) =>
+  handle().then(() => deepEqual(getPkg().dependencies, DEPS)));
+
+test.skip('package.json has default devDependencies', ({ deepEqual }) =>
+  handle().then(() => deepEqual(getPkg().devDependencies, DEV_DEPS)));
+
+test('package.json has default scripts', ({ deepEqual }) =>
+  handle().then(() => deepEqual(getPkg().scripts, SCRIPTS)));
 
 test('package.json has given name', ({ is }) =>
   handle().then(() => is(getPkg().name, NAME)));
@@ -105,3 +126,18 @@ test('package.json has given repo url', ({ deepEqual }) =>
 
 test('package.json has given custom fields', ({ is }) =>
   handle({ test: 'test' }).then(() => is(getPkg().test, 'test')));
+
+// git
+
+test('initializes git', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/.git`))));
+
+test('adds gitignore from github', ({ truthy }) =>
+  handle().then(() => truthy(fileExists(`${NAME}/.gitignore`))));
+
+// yarn
+
+test.skip('initializes yarn', ({ truthy }) =>
+  handle({ install: true }).then(() =>
+    truthy(fileExists(`${NAME}/yarn.lock`))
+  ));

@@ -8,3 +8,14 @@ export const fileExists = path => {
     return code !== 'ENOENT';
   }
 };
+
+export const DEV_DEPS = {};
+
+export const DEPS = {};
+
+export const SCRIPTS = {
+  build: 'node-starter build',
+  test: 'node-starter test',
+  dev: 'node-starter dev',
+  start: 'node-starter start'
+};
