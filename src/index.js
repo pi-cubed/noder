@@ -1,3 +1,7 @@
 import { create } from './commands/index';
 
-const { argv } = create.demandCommand().help('h');
+try {
+  const { argv } = create.demandCommand().help('h');
+} catch ({ message }) {
+  console.error(`node-starter: ${message}`);
+}

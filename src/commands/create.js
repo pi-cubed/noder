@@ -10,12 +10,32 @@ const nameTakenError = () => {
 
 const mkdirAsync = promisify(mkdir);
 
-const initPkg = name => writePkg(name, { name, version: '0.1.0' });
+const initPkg = ({
+  name,
+  version = '0.1.0',
+  license = 'MIT',
+  author = 'Pi Cubed',
+  engines,
+  ...fields
+}) =>
+  writePkg(name, {
+    name,
+    version,
+    license,
+    author,
+    homepage: `https://github.com/pi-cubed/${name}`,
+    bugs: `https://github.com/pi-cubed/${name}/issues`,
+    engines: { node: '>=8.0.0', ...engines },
+    ...fields
+  });
 
-const handler = ({ name }) =>
-  fileExists(name)
+/**
+ * TODO docs
+ */
+export const handler = fields =>
+  fileExists(fields.name)
     ? nameTakenError()
-    : mkdirAsync(name).then(() => initPkg(name));
+    : mkdirAsync(fields.name).then(() => initPkg(fields));
 
 /**
  * TODO docs
