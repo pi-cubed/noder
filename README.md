@@ -23,8 +23,8 @@
 [contributors-badge]: https://img.shields.io/github/contributors/pi-cubed/node-starter.svg?style=flat-square
 [contributors]: https://github.com/pi-cubed/node-starter/graphs/contributors
 [license-badge]: https://img.shields.io/github/license/pi-cubed/node-starter.svg?style=flat-square
-[license]: https://github.com/pi-cubed/node-starter/blob/master/ISC
-[npm-downloads-badge]: https://img.shields.io/npm/dt/node-starter.svg?style=flat-square
+[license]: https://github.com/pi-cubed/node-starter/blob/master/MIT
+[npm-downloads-badge]: https://img.shields.io/npm/dt/@pi-cubednode-starter.svg?style=flat-square
 [synk-badge]: https://snyk.io/test/github/pi-cubed/node-starter/badge.svg?style=flat-square
 [synk]: https://snyk.io/test/github/pi-cubed/node-starter
 [semantic-release-badge]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=flat-square
