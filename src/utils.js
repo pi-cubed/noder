@@ -9,7 +9,9 @@ export const fileExists = path => {
   }
 };
 
-export const DEV_DEPS = {};
+export const DEV_DEPS = {
+  '@pi-cubed/node-starter': 'latest'
+};
 
 export const DEPS = {};
 

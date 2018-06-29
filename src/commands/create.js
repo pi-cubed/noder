@@ -18,18 +18,18 @@ const initPkg = ({
   version = '0.1.0',
   license = 'MIT',
   author = 'Pi Cubed',
-  dependencies = DEPS,
-  devDependencies = DEV_DEPS,
-  scripts = SCRIPTS,
-  engines,
+  dependencies = {},
+  devDependencies = {},
+  scripts = {},
+  engines = {},
   ...fields
 }) =>
   writePkg(name, {
     name,
     version,
-    dependencies,
-    devDependencies,
-    scripts,
+    dependencies: { ...DEPS, ...dependencies },
+    devDependencies: { ...DEV_DEPS, ...devDependencies },
+    scripts: { ...SCRIPTS, ...scripts },
     license,
     author,
     homepage: `https://github.com/pi-cubed/${name}`,
@@ -59,8 +59,8 @@ export const handler = ({ $0, h, _, install = true, ...fields }) => {
     ? nameTakenError()
     : mkdirAsync(name)
         .then(() => initPkg(fields))
-        .then(() => initGit(name));
-  // .then(() => install && initYarn(name));
+        .then(() => initGit(name))
+        .then(() => install && initYarn(name));
 };
 
 /**

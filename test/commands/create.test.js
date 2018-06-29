@@ -48,11 +48,32 @@ test('package.json does not have yarg impl fields', ({ truthy }) =>
 test.skip('package.json has default dependencies', ({ deepEqual }) =>
   handle().then(() => deepEqual(getPkg().dependencies, DEPS)));
 
-test.skip('package.json has default devDependencies', ({ deepEqual }) =>
+test('package.json has given and default dependencies', ({ deepEqual }) =>
+  handle({ dependencies: { '@pi-cubed/typed-ui': 'latest' } }).then(() =>
+    deepEqual(getPkg().dependencies, {
+      '@pi-cubed/typed-ui': 'latest',
+      ...DEPS
+    })
+  ));
+
+test('package.json has default devDependencies', ({ deepEqual }) =>
   handle().then(() => deepEqual(getPkg().devDependencies, DEV_DEPS)));
+
+test('package.json has given and default devDependencies', ({ deepEqual }) =>
+  handle({ devDependencies: { '@pi-cubed/typed-ui': 'latest' } }).then(() =>
+    deepEqual(getPkg().devDependencies, {
+      '@pi-cubed/typed-ui': 'latest',
+      ...DEV_DEPS
+    })
+  ));
 
 test('package.json has default scripts', ({ deepEqual }) =>
   handle().then(() => deepEqual(getPkg().scripts, SCRIPTS)));
+
+test('package.json has given and default scripts', ({ deepEqual }) =>
+  handle({ scripts: { a: 'a' } }).then(() =>
+    deepEqual(getPkg().scripts, { a: 'a', ...SCRIPTS })
+  ));
 
 test('package.json has given name', ({ is }) =>
   handle().then(() => is(getPkg().name, NAME)));
@@ -137,7 +158,7 @@ test('adds gitignore from github', ({ truthy }) =>
 
 // yarn
 
-test.skip('initializes yarn', ({ truthy }) =>
+test('initializes yarn', ({ truthy }) =>
   handle({ install: true }).then(() =>
     truthy(fileExists(`${NAME}/yarn.lock`))
   ));

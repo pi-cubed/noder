@@ -1,6 +1,6 @@
 {
   "name": "@pi-cubed/node-starter",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Make Node.js programs",
   "scripts": {
     "build": "babel src -d build",
