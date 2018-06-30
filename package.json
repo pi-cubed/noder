@@ -1,5 +1,5 @@
 {
-  "name": "@pi-cubed/node-starter",
+  "name": "@pi-cubed/noder",
   "version": "0.1.0-alpha.3",
   "description": "Make Node.js programs",
   "scripts": {
