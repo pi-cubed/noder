@@ -1,4 +1,3 @@
-import { serial as test } from 'ava';
 import { remove } from 'fs-extra';
 import readPkg from 'read-pkg';
 import { create, createHandler } from '../../src/commands/index';
@@ -25,182 +24,281 @@ const rmdir = () => fileExists(NAME) && remove(NAME);
 
 const getPkg = () => readPkg.sync({ cwd: NAME });
 
-test.beforeEach(rmdir);
-test.afterEach.always(rmdir);
+beforeEach(rmdir);
+afterEach(rmdir);
 
 // parsing
 
-test('fails parse if not given a name', ({ is }) =>
-  parseCreate('create', ({ message }) =>
-    is(message, 'Not enough non-option arguments: got 0, need at least 1')
-  ));
+// test('fails parse if not given a name', () =>
+//   expect(parseCreate('create').catch(({ message }) => message)).resolves.toBe(
+//     'Not enough non-option arguments: got 0, need at least 1'
+//   ));
 
-// // directory
+// directory
 
-// test('fails if directory with name exists', ({ is, throws }) => {
-//   const { message } = throws(() => handle({ name: 'src' }));
-//   is(message, 'File already exists with that name');
+// test('fails if directory with name exists', () => {
+//   expect.assertions(1);
+//   return handle({ name: 'src' }).catch(e =>
+//     expect(e).toBe('File already exists with that name')
+//   );
 // });
 
-// test('creates directory with given name', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(NAME))));
+test('creates directory with given name', () =>
+  expect(handle().then(() => fileExists(NAME))).resolves.toBeTruthy());
 
 // // package.json
 
-// test('creates package.json in directory', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/package.json`))));
+test('creates package.json in directory', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/package.json`))
+  ).resolves.toBeTruthy());
 
-// test('package.json does not have yarg impl fields', ({ truthy }) =>
-//   handle().then(() => {
-//     const { $0, h, _ } = getPkg();
-//     truthy(!($0 || h || _));
-//   }));
+test('package.json does not have yarg impl fields', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ $0, h, _ }) => $0 || h || _)
+  ).resolves.toBeFalsy());
 
-// test('package.json has given name with default scope', ({ is }) =>
-//   handle().then(() => is(getPkg().name, `@${SCOPE}/${NAME}`)));
+test('package.json has given name with default scope', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ name }) => name)
+  ).resolves.toBe(`@${SCOPE}/${NAME}`));
 
-// test('package.json has given name with given scope', ({ is }) =>
-//   handle({ scope: 'test' }).then(() => is(getPkg().name, `@test/${NAME}`)));
+test('package.json has given name with given scope', () =>
+  expect(
+    handle({ scope: 'test' })
+      .then(getPkg)
+      .then(({ name }) => name)
+  ).resolves.toBe(`@test/${NAME}`));
 
-// test('package.json has no dependencies', ({ is }) =>
-//   handle().then(() => is(getPkg().dependencies, undefined)));
+test('package.json has no dependencies', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ dependencies }) => dependencies)
+  ).resolves.toBeUndefined());
 
-// test('package.json has given and default dependencies', ({ deepEqual }) =>
-//   handle({ dependencies: { '@pi-cubed/typed-ui': 'latest' } }).then(() =>
-//     deepEqual(getPkg().dependencies, {
-//       '@pi-cubed/typed-ui': 'latest',
-//       ...DEPS
-//     })
-//   ));
+test('package.json has given and default dependencies', () =>
+  expect(
+    handle({ dependencies: { '@pi-cubed/typed-ui': 'latest' } })
+      .then(getPkg)
+      .then(({ dependencies }) => dependencies)
+  ).resolves.toEqual({
+    '@pi-cubed/typed-ui': 'latest',
+    ...DEPS
+  }));
 
-// test('package.json has default devDependencies', ({ deepEqual }) =>
-//   handle().then(() => deepEqual(getPkg().devDependencies, DEV_DEPS)));
+test('package.json has default devDependencies', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ devDependencies }) => devDependencies)
+  ).resolves.toEqual(DEV_DEPS));
 
-// test('package.json has given and default devDependencies', ({ deepEqual }) =>
-//   handle({ devDependencies: { '@pi-cubed/typed-ui': 'latest' } }).then(() =>
-//     deepEqual(getPkg().devDependencies, {
-//       '@pi-cubed/typed-ui': 'latest',
-//       ...DEV_DEPS
-//     })
-//   ));
+test('package.json has given and default devDependencies', () =>
+  expect(
+    handle({ devDependencies: { '@pi-cubed/typed-ui': 'latest' } })
+      .then(getPkg)
+      .then(({ devDependencies }) => devDependencies)
+  ).resolves.toEqual({
+    '@pi-cubed/typed-ui': 'latest',
+    ...DEV_DEPS
+  }));
 
-// test('package.json has default scripts', ({ deepEqual }) =>
-//   handle().then(() => deepEqual(getPkg().scripts, SCRIPTS)));
+test('package.json has default scripts', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ scripts }) => scripts)
+  ).resolves.toEqual(SCRIPTS));
 
-// test('package.json has given and default scripts', ({ deepEqual }) =>
-//   handle({ scripts: { a: 'a' } }).then(() =>
-//     deepEqual(getPkg().scripts, { a: 'a', ...SCRIPTS })
-//   ));
+test('package.json has given and default scripts', () =>
+  expect(
+    handle({ scripts: { a: 'a' } })
+      .then(getPkg)
+      .then(({ scripts }) => scripts)
+  ).resolves.toEqual({ a: 'a', ...SCRIPTS }));
 
-// test('package.json has default version', ({ is }) =>
-//   handle().then(() => is(getPkg().version, VERSION)));
+test('package.json has default version', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ version }) => version)
+  ).resolves.toBe(VERSION));
 
-// test('package.json has given version', ({ is }) =>
-//   handle({ version: '1.0.0' }).then(() => is(getPkg().version, '1.0.0')));
+test('package.json has given version', () =>
+  expect(
+    handle({ version: '1.0.0' })
+      .then(getPkg)
+      .then(({ version }) => version)
+  ).resolves.toBe('1.0.0'));
 
-// test('package.json has default license', ({ is }) =>
-//   handle().then(() => is(getPkg().license, LICENSE)));
+test('package.json has default license', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ license }) => license)
+  ).resolves.toBe(LICENSE));
 
-// test('package.json has given license', ({ is }) =>
-//   handle({ license: 'ISC' }).then(() => is(getPkg().license, 'ISC')));
+test('package.json has given license', () =>
+  expect(
+    handle({ license: 'ISC' })
+      .then(getPkg)
+      .then(({ license }) => license)
+  ).resolves.toBe('ISC'));
 
-// test('package.json has default author', ({ deepEqual }) =>
-//   handle().then(() => deepEqual(getPkg().author, { name: AUTHOR })));
+test('package.json has default author', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ author }) => author)
+  ).resolves.toEqual({ name: AUTHOR }));
 
-// test('package.json has given author', ({ deepEqual }) =>
-//   handle({ author: 'test' }).then(() =>
-//     deepEqual(getPkg().author, { name: 'test' })
-//   ));
+test('package.json has given author', () =>
+  expect(
+    handle({ author: 'test' })
+      .then(getPkg)
+      .then(({ author }) => author)
+  ).resolves.toEqual({ name: 'test' }));
 
-// test('package.json has given repo url', ({ deepEqual }) =>
-//   handle({ scope: 'a' }).then(() =>
-//     deepEqual(getPkg().repository, {
-//       type: 'git',
-//       url: `git+ssh://git@github.com/a/${NAME}.git`
-//     })
-//   ));
+test('package.json has given repo url', () =>
+  expect(
+    handle({ scope: 'a' })
+      .then(getPkg)
+      .then(({ repository }) => repository)
+  ).resolves.toEqual({
+    type: 'git',
+    url: `git+ssh://git@github.com/a/${NAME}.git`
+  }));
 
-// test('package.json has default homepage', ({ is }) =>
-//   handle().then(() =>
-//     is(getPkg().homepage, `https://github.com/${SCOPE}/${NAME}`)
-//   ));
+test('package.json has default homepage', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ homepage }) => homepage)
+  ).resolves.toBe(`https://github.com/${SCOPE}/${NAME}`));
 
-// test('package.json has given homepage', ({ is }) =>
-//   handle({ homepage: 'https://test.com' }).then(() =>
-//     is(getPkg().homepage, 'https://test.com')
-//   ));
+test('package.json has given homepage', () =>
+  expect(
+    handle({ homepage: 'https://test.com' })
+      .then(getPkg)
+      .then(({ homepage }) => homepage)
+  ).resolves.toBe('https://test.com'));
 
-// test('package.json has default bugs url', ({ deepEqual }) =>
-//   handle().then(() =>
-//     deepEqual(getPkg().bugs, {
-//       url: `https://github.com/${SCOPE}/${NAME}/issues`
-//     })
-//   ));
+test('package.json has default bugs url', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ bugs }) => bugs)
+  ).resolves.toEqual({
+    url: `https://github.com/${SCOPE}/${NAME}/issues`
+  }));
 
-// test('package.json has given bugs url', ({ deepEqual }) =>
-//   handle({ bugs: 'https://test.com' }).then(() =>
-//     deepEqual(getPkg().bugs, { url: 'https://test.com' })
-//   ));
+test('package.json has given bugs url', () =>
+  expect(
+    handle({ bugs: 'https://test.com' })
+      .then(getPkg)
+      .then(({ bugs }) => bugs)
+  ).resolves.toEqual({ url: 'https://test.com' }));
 
-// test('package.json has default engine', ({ deepEqual }) =>
-//   handle().then(() => deepEqual(getPkg().engines, ENGINES)));
+test('package.json has default engine', () =>
+  expect(
+    handle()
+      .then(getPkg)
+      .then(({ engines }) => engines)
+  ).resolves.toEqual(ENGINES));
 
-// test('package.json has given and default engines', ({ deepEqual }) =>
-//   handle({ engines: { python: '>=3.5.0' } }).then(() =>
-//     deepEqual(getPkg().engines, { ...ENGINES, python: '>=3.5.0' })
-//   ));
+test('package.json has given and default engines', () =>
+  expect(
+    handle({ engines: { python: '>=3.5.0' } })
+      .then(getPkg)
+      .then(({ engines }) => engines)
+  ).resolves.toEqual({ ...ENGINES, python: '>=3.5.0' }));
 
-// test('package.json has given engine', ({ deepEqual }) =>
-//   handle({ engines: { node: '>=10.0.0' } }).then(() =>
-//     deepEqual(getPkg().engines, { node: '>=10.0.0' })
-//   ));
+test('package.json has given engine', () =>
+  expect(
+    handle({ engines: { node: '>=10.0.0' } })
+      .then(getPkg)
+      .then(({ engines }) => engines)
+  ).resolves.toEqual({ node: '>=10.0.0' }));
 
-// test('package.json has given description', ({ is }) =>
-//   handle({ description: 'test' }).then(() => is(getPkg().description, 'test')));
+test('package.json has given description', () =>
+  expect(
+    handle({ description: 'test' })
+      .then(getPkg)
+      .then(({ description }) => description)
+  ).resolves.toBe('test'));
 
-// test('package.json has given custom fields', ({ is }) =>
-//   handle({ test: 'test' }).then(() => is(getPkg().test, 'test')));
+test('package.json has given custom fields', () =>
+  expect(
+    handle({ test: 'test' })
+      .then(getPkg)
+      .then(({ test }) => test)
+  ).resolves.toBe('test'));
 
-// // git
+// git
 
-// test('initializes git', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/.git`))));
+test('initializes git', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/.git`))
+  ).resolves.toBeTruthy());
 
-// test('adds gitignore from github', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/.gitignore`))));
+test('adds gitignore from github', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/.gitignore`))
+  ).resolves.toBeTruthy());
 
-// // yarn
+// lib
 
-// test.skip('initializes yarn', ({ truthy }) =>
-//   handle({ install: true }).then(() =>
-//     truthy(fileExists(`${NAME}/yarn.lock`))
-//   ));
+test('adds README.md', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/README.md`))
+  ).resolves.toBeTruthy());
 
-// // lib
+test('adds .travis.yml', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/.travis.yml`))
+  ).resolves.toBeTruthy());
 
-// test('adds README.md', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/README.md`))));
+test('adds LICENSE', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/LICENSE`))
+  ).resolves.toBeTruthy());
 
-// test('adds .travis.yml', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/.travis.yml`))));
+test('adds CONTRIBUTING.md', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/CONTRIBUTING.md`))
+  ).resolves.toBeTruthy());
 
-// test('adds LICENSE', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/LICENSE`))));
+test('adds .prettierrc', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/.prettierrc`))
+  ).resolves.toBeTruthy());
 
-// test('adds CONTRIBUTING.md', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/CONTRIBUTING.md`))));
+test('adds src directory', () =>
+  expect(handle().then(() => fileExists(`${NAME}/src`))).resolves.toBeTruthy());
 
-// test('adds .prettierrc', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/.prettierrc`))));
+test('adds test directory', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/test`))
+  ).resolves.toBeTruthy());
 
-// test('adds src directory', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/src`))));
+test('adds index.js template', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/src/index.js`))
+  ).resolves.toBeTruthy());
 
-// test('adds test directory', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/test`))));
+test('adds index.test.js template', () =>
+  expect(
+    handle().then(() => fileExists(`${NAME}/test/index.test.js`))
+  ).resolves.toBeTruthy());
 
-// test('adds index.js template', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/src/index.js`))));
+// yarn
 
-// test('adds index.test.js template', ({ truthy }) =>
-//   handle().then(() => truthy(fileExists(`${NAME}/test/index.test.js`))));
+test('initializes yarn', () =>
+  expect(
+    handle({ install: true }).then(() => fileExists(`${NAME}/yarn.lock`))
+  ).resolves.toBeTruthy());
