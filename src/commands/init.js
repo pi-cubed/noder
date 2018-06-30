@@ -1,9 +1,10 @@
+import path from 'path';
 import { command } from 'yargs';
 import { promisifyAll } from 'bluebird';
 import git from 'simple-git/promise';
 import installPkgs from 'install-packages';
 import replace from 'replace-in-file';
-import { parse } from 'inquirer';
+import { prompt } from 'inquirer';
 import readPkg from 'read-pkg';
 import writePkg from 'write-pkg';
 import loadJsonFile from 'load-json-file';
@@ -23,16 +24,16 @@ import {
 const { mkdirAsync, writeFileAsync } = promisifyAll(require('fs'));
 const { copyAsync } = promisifyAll(require('fs-extra'));
 
-const initConfig = fields =>
-  fileExists(CONFIG)
-    ? loadJsonFile(CONFIG)
-    : promptConfig().then(config =>
-        writeJsonFile(CONFIG, config).then(() => ({ ...fields, ...config }))
-      );
+const initConfig = fields => (fileExists(CONFIG) ? loadJsonFile(CONFIG) : null);
+
+//promptConfig().then(config =>
+//   writeJsonFile(CONFIG, config).then(() => ({ ...fields, ...config }))
+// )
 
 const promptConfig = () =>
-  parse([
+  prompt([
     { type: 'string', name: 'name', message: 'Package name' },
+    { type: 'string', name: 'description', message: 'Package description' },
     { type: 'string', name: 'scope', message: 'Package scope', default: SCOPE },
     {
       type: 'string',
@@ -66,8 +67,10 @@ const initPkg = config => {
     scripts = {},
     engines = {}
   } = config;
+  const original = fileExists('package.json') ? readPkg.sync() : {};
   const data = {
     ...config,
+    ...original,
     name: scope ? `@${scope}/${name}` : name,
     scope,
     version,
@@ -84,36 +87,38 @@ const initPkg = config => {
   return writePkg(data).then(() => data);
 };
 
-const mkdir = fields =>
-  fileExists(fields.name)
-    ? nameTakenError()
-    : mkdirAsync(fields.name).then(() => fields);
-
-const initGit = fields =>
-  git(fields.name)
+const initGit = config =>
+  git()
     .init()
-    .then(() => fields);
+    .then(() => config);
 
-const initYarn = fields => installPkgs({ cwd: fields.name }).then(() => fields);
+const copyLib = config => {
+  fileExists('.travis.yml') && loadJsonFile('.travis.yml');
 
-const copyLib = fields => copyAsync('lib', fields.name).then(() => fields);
+  return copyAsync(path.join(__dirname, '../../lib'), process.cwd(), {
+    overwrite: false
+  }).then(() => config);
+};
 
-const updateFiles = fields => {
-  const { name, scope, author, license } = fields;
+const updateFiles = config => {
+  const { name, scope, author, license } = config;
   return replace({
     files: ['README.md', 'LICENSE'],
     from: ['NAME', 'SCOPE', 'AUTHOR', 'LICENSE'],
     to: [name, scope, author, license]
-  }).then(() => fields);
+  }).then(() => config);
 };
 
 /**
  * TODO docs
  */
-export const initHandler = ({ $0, h, _, install = true, ...fields }) => {
-  return initConfig(fields).then(initPkg);
-};
-
+export const initHandler = ({ $0, h, _, install = true, ...fields }) =>
+  initConfig(fields)
+    .then(initPkg)
+    .then(initGit)
+    .then(copyLib)
+    .then(updateFiles)
+    .then(install ? installPkgs : _ => _);
 /**
  * TODO docs
  */
