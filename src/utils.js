@@ -10,7 +10,7 @@ export const fileExists = path => {
 };
 
 export const DEV_DEPS = {
-  '@pi-cubed/node-starter': 'latest'
+  '@pi-cubed/node-starter': '0.1.0-alpha.2'
 };
 
 export const DEPS = {};
@@ -31,3 +31,5 @@ export const AUTHOR = 'Pi Cubed';
 export const LICENSE = 'MIT';
 
 export const ENGINES = { node: '>=8.0.0' };
+
+export const CONFIG = '.noderrc';

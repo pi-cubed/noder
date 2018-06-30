@@ -1,7 +1,7 @@
 import { serial as test } from 'ava';
 import { remove } from 'fs-extra';
 import readPkg from 'read-pkg';
-import { create, handler } from '../../src/commands/index';
+import { create, createHandler } from '../../src/commands/index';
 import {
   fileExists,
   DEPS,
@@ -18,11 +18,12 @@ const NAME = 'test-directory';
 
 const parseCreate = (...args) => create.exitProcess(false).parse(...args);
 
-const handle = (opts = {}) => handler({ name: NAME, install: false, ...opts });
+const handle = (opts = {}) =>
+  createHandler({ name: NAME, install: false, ...opts });
 
 const rmdir = () => fileExists(NAME) && remove(NAME);
 
-const getPkg = key => readPkg.sync({ cwd: NAME });
+const getPkg = () => readPkg.sync({ cwd: NAME });
 
 test.beforeEach(rmdir);
 test.afterEach.always(rmdir);
@@ -170,7 +171,7 @@ test('adds gitignore from github', ({ truthy }) =>
 
 // yarn
 
-test('initializes yarn', ({ truthy }) =>
+test.skip('initializes yarn', ({ truthy }) =>
   handle({ install: true }).then(() =>
     truthy(fileExists(`${NAME}/yarn.lock`))
   ));
@@ -188,9 +189,6 @@ test('adds LICENSE', ({ truthy }) =>
 
 test('adds CONTRIBUTING.md', ({ truthy }) =>
   handle().then(() => truthy(fileExists(`${NAME}/CONTRIBUTING.md`))));
-
-test('adds docs config', ({ truthy }) =>
-  handle().then(() => truthy(fileExists(`${NAME}/book.json`))));
 
 test('adds .prettierrc', ({ truthy }) =>
   handle().then(() => truthy(fileExists(`${NAME}/.prettierrc`))));

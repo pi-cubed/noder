@@ -1,9 +1,13 @@
 import { command } from 'yargs';
 import { promisifyAll } from 'bluebird';
-import writePkg from 'write-pkg';
 import git from 'simple-git/promise';
 import installPkgs from 'install-packages';
 import replace from 'replace-in-file';
+import { parse } from 'inquirer';
+import readPkg from 'read-pkg';
+import writePkg from 'write-pkg';
+import loadJsonFile from 'load-json-file';
+import writeJsonFile from 'write-json-file';
 import {
   fileExists,
   DEPS,
@@ -13,16 +17,44 @@ import {
   VERSION,
   LICENSE,
   AUTHOR,
-  ENGINES
+  ENGINES,
+  CONFIG
 } from '../utils';
 const { mkdirAsync, writeFileAsync } = promisifyAll(require('fs'));
 const { copyAsync } = promisifyAll(require('fs-extra'));
 
-const nameTakenError = () => {
-  throw new Error('File already exists with that name');
-};
+const initConfig = fields =>
+  fileExists(CONFIG)
+    ? loadJsonFile(CONFIG)
+    : promptConfig().then(config =>
+        writeJsonFile(CONFIG, config).then(() => ({ ...fields, ...config }))
+      );
 
-const initPkg = fields => {
+const promptConfig = () =>
+  parse([
+    { type: 'string', name: 'name', message: 'Package name' },
+    { type: 'string', name: 'scope', message: 'Package scope', default: SCOPE },
+    {
+      type: 'string',
+      name: 'author',
+      message: 'Package author',
+      default: AUTHOR
+    },
+    {
+      type: 'string',
+      name: 'version',
+      message: 'Package version',
+      default: VERSION
+    },
+    {
+      type: 'string',
+      name: 'license',
+      message: 'Package license',
+      default: LICENSE
+    }
+  ]);
+
+const initPkg = config => {
   const {
     name,
     scope = SCOPE,
@@ -33,22 +65,23 @@ const initPkg = fields => {
     devDependencies = {},
     scripts = {},
     engines = {}
-  } = fields;
-  const pkgName = scope ? `@${scope}/${name}` : name;
-  return writePkg(name, {
-    ...fields,
-    name: pkgName,
+  } = config;
+  const data = {
+    ...config,
+    name: scope ? `@${scope}/${name}` : name,
+    scope,
     version,
+    license,
+    author,
     dependencies: { ...DEPS, ...dependencies },
     devDependencies: { ...DEV_DEPS, ...devDependencies },
     scripts: { ...SCRIPTS, ...scripts },
-    license,
-    author,
     repository: `git+ssh://git@github.com/${scope}/${name}.git`,
-    homepage: fields.homepage || `https://github.com/${scope}/${name}`,
-    bugs: fields.bugs || `https://github.com/${scope}/${name}/issues`,
+    homepage: config.homepage || `https://github.com/${scope}/${name}`,
+    bugs: config.bugs || `https://github.com/${scope}/${name}/issues`,
     engines: { ...ENGINES, ...engines }
-  }).then(() => fields);
+  };
+  return writePkg(data).then(() => data);
 };
 
 const mkdir = fields =>
@@ -77,21 +110,16 @@ const updateFiles = fields => {
 /**
  * TODO docs
  */
-export const createHandler = ({ $0, h, _, install = true, ...fields }) => {
-  return mkdir(fields)
-    .then(initPkg)
-    .then(initGit)
-    .then(copyLib)
-    .then(updateFiles)
-    .then(install ? initYarn : _ => _);
+export const initHandler = ({ $0, h, _, install = true, ...fields }) => {
+  return initConfig(fields).then(initPkg);
 };
 
 /**
  * TODO docs
  */
-export const create = command(
-  'create <name>',
-  'make a Node.js program',
+export const init = command(
+  'init',
+  'initialize a noder project',
   {},
-  createHandler
+  initHandler
 );
