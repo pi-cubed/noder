@@ -108,6 +108,7 @@ const CONFIG_PROMPTS = [
  */
 const promptMissingConfig = fields => {
   const prompts = CONFIG_PROMPTS.filter(({ name }) => name in fields);
+  // console.log(prompts);
   return prompts.length ? prompt(prompts) : {};
 };
 
