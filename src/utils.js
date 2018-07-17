@@ -32,4 +32,15 @@ export const LICENSE = 'MIT';
 
 export const ENGINES = { node: '>=8.0.0' };
 
-export const CONFIG = '.noderrc';
+export const CONFIG_PATH = '.noderrc';
+
+export const CONFIG_FIELDS = [
+  'name',
+  'description',
+  'scope',
+  'author',
+  'version',
+  'license'
+];
+
+export const then = f => new Promise(_ => _()).then(f);

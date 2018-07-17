@@ -19,42 +19,103 @@ import {
   LICENSE,
   AUTHOR,
   ENGINES,
-  CONFIG
+  CONFIG_PATH,
+  CONFIG_FIELDS,
+  then
 } from '../utils';
 const { mkdirAsync, writeFileAsync } = promisifyAll(require('fs'));
 const { copyAsync } = promisifyAll(require('fs-extra'));
 
-const initConfig = fields => (fileExists(CONFIG) ? loadJsonFile(CONFIG) : null);
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const initConfig = fields =>
+  then(() => getConfig(fields))
+    .then(mergeConfig(fields))
+    .then(config =>
+      then(() => getMissingConfig(config))
+        .then(promptMissingConfig)
+        .then(mergeConfig(config))
+    )
+    .then(writeConfig);
 
-//promptConfig().then(config =>
-//   writeJsonFile(CONFIG, config).then(() => ({ ...fields, ...config }))
-// )
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const mergeConfig = a => b => ({ ...b, ...a });
 
-const promptConfig = () =>
-  prompt([
-    { type: 'string', name: 'name', message: 'Package name' },
-    { type: 'string', name: 'description', message: 'Package description' },
-    { type: 'string', name: 'scope', message: 'Package scope', default: SCOPE },
-    {
-      type: 'string',
-      name: 'author',
-      message: 'Package author',
-      default: AUTHOR
-    },
-    {
-      type: 'string',
-      name: 'version',
-      message: 'Package version',
-      default: VERSION
-    },
-    {
-      type: 'string',
-      name: 'license',
-      message: 'Package license',
-      default: LICENSE
-    }
-  ]);
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const writeConfig = config =>
+  writeJsonFile(CONFIG_PATH, config).then(() => config);
 
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const getConfig = fields =>
+  fileExists(CONFIG_PATH) ? loadJsonFile(CONFIG_PATH) : {};
+
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const getMissingConfig = fields =>
+  Object.keys(fields).filter(f => !(f in CONFIG_FIELDS));
+
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const CONFIG_PROMPTS = [
+  { type: 'string', name: 'name', message: 'Package name' },
+  { type: 'string', name: 'description', message: 'Package description' },
+  { type: 'string', name: 'scope', message: 'Package scope', default: SCOPE },
+  {
+    type: 'string',
+    name: 'author',
+    message: 'Package author',
+    default: AUTHOR
+  },
+  {
+    type: 'string',
+    name: 'version',
+    message: 'Package version',
+    default: VERSION
+  },
+  {
+    type: 'string',
+    name: 'license',
+    message: 'Package license',
+    default: LICENSE
+  }
+];
+
+/**
+ * TODO docs
+ *
+ * @private
+ */
+const promptMissingConfig = fields => {
+  const prompts = CONFIG_PROMPTS.filter(({ name }) => name in fields);
+  return prompts.length ? prompt(prompts) : {};
+};
+
+/**
+ * TODO docs
+ *
+ * @private
+ */
 const initPkg = config => {
   const {
     name,
@@ -87,11 +148,21 @@ const initPkg = config => {
   return writePkg(data).then(() => data);
 };
 
+/**
+ * TODO docs
+ *
+ * @private
+ */
 const initGit = config =>
   git()
     .init()
     .then(() => config);
 
+/**
+ * TODO docs
+ *
+ * @private
+ */
 const copyLib = config => {
   fileExists('.travis.yml') && loadJsonFile('.travis.yml');
 
@@ -100,6 +171,11 @@ const copyLib = config => {
   }).then(() => config);
 };
 
+/**
+ * TODO docs
+ *
+ * @private
+ */
 const updateFiles = config => {
   const { name, scope, author, license } = config;
   return replace({

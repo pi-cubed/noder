@@ -16,7 +16,8 @@ import {
   LICENSE,
   VERSION,
   ENGINES,
-  CONFIG
+  CONFIG_PATH,
+  then
 } from '../../src/utils';
 
 const { chdir } = process;
@@ -28,17 +29,15 @@ const handle = (opts = {}) =>
 
 const rmdir = () => (fileExists(NAME) ? del(NAME) : _ => _);
 
-const then = f => new Promise(_ => _()).then(f);
-
 const mkConfig = () =>
   then(() => rmdir())
     .then(() => mkdir(NAME))
     .then(() => chdir(NAME))
-    .then(() => writeJsonFile(CONFIG, { name: NAME }));
+    .then(() => writeJsonFile(CONFIG_PATH, { name: NAME }));
 
 const rmConfig = () => then(() => chdir('..')).then(rmdir);
 
-const getConfig = () => loadJsonFile.sync(`${NAME}/${CONFIG}`);
+const getConfig = () => loadJsonFile.sync(`${NAME}/${CONFIG_PATH}`);
 
 beforeEach(mkConfig);
 afterEach(rmConfig);
@@ -53,8 +52,8 @@ afterEach(rmConfig);
 
 test('creates package.json with given and default fields', () =>
   expect(
-    writeJsonFile(CONFIG, { name: 'test' })
-      .then(handle)
+    writeJsonFile(CONFIG_PATH, { name: 'test' })
+      .then(() => initHandler({ install: false }))
       .then(readPkg)
       .then(({ name }) => name)
   ).resolves.toBe(`@${SCOPE}/test`));
@@ -176,7 +175,7 @@ test('initializes git', () =>
 
 // yarn
 
-test('initializes yarn', () =>
-  expect(
-    handle({ install: true }).then(() => fileExists('yarn.lock'))
-  ).resolves.toBeTruthy());
+// test('initializes yarn', () =>
+//   expect(
+//     handle({ install: true }).then(() => fileExists('yarn.lock'))
+//   ).resolves.toBeTruthy());

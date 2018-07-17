@@ -4,7 +4,7 @@
   "description": "Make Node.js programs",
   "scripts": {
     "build": "babel src -d build",
-    "test": "jest",
+    "test": "jest ",
     "clean": "rm -rf build",
     "dev": "npm-watch",
     "start": "./bin/index.js",

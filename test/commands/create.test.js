@@ -298,7 +298,7 @@ test('adds index.test.js template', () =>
 
 // yarn
 
-test('initializes yarn', () =>
-  expect(
-    handle({ install: true }).then(() => fileExists(`${NAME}/yarn.lock`))
-  ).resolves.toBeTruthy());
+// test('initializes yarn', () =>
+//   expect(
+//     handle({ install: true }).then(() => fileExists(`${NAME}/yarn.lock`))
+//   ).resolves.toBeTruthy());
